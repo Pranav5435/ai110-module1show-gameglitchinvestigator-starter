@@ -1,5 +1,7 @@
 import random
 import streamlit as st
+# FIX: AI and I moved the gameplay helpers into logic_utils.py so the UI and tests
+# share one implementation; this also cleaned up the earlier trailing-space import edit.
 from logic_utils import check_guess, get_range_for_difficulty, parse_guess, update_score
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
@@ -30,6 +32,8 @@ st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
+# FIXME: The baseline started the attempt counter at 1 before the player made a guess.
+# FIX: AI and I reset the initial counter to 0 so the first submit is attempt 1.
 if "attempts" not in st.session_state:
     st.session_state.attempts = 0
 
@@ -42,6 +46,8 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# FIXME: Without persisted hint state, Streamlit reruns dropped the previous feedback.
+# FIX: AI and I store the last hint message in session state so rerenders can restore it.
 if "last_message" not in st.session_state:
     st.session_state.last_message = None
 
@@ -64,6 +70,10 @@ raw_guess = st.text_input(
     key=f"guess_input_{difficulty}"
 )
 
+# FIXME: The original checkbox only controlled the current render, so hints disappeared
+# after reruns and could not be cleared consistently.
+# FIX: AI and I moved hint visibility around session_state.last_message so the latest
+# feedback can be hidden, restored, and shown outside the old third-column layout.
 show_hint = st.checkbox("Show hint", value=True)
 if not show_hint:
     st.session_state.last_message = None
@@ -107,6 +117,8 @@ if submit:
             secret = st.session_state.secret
 
         outcome, message = check_guess(guess_int, secret)
+        # FIXME: The earlier app did not persist the newest hint before rerendering.
+        # FIX: AI and I save the latest message so the next Streamlit run can show it again.
         st.session_state.last_message = message
 
         if show_hint:
@@ -134,6 +146,10 @@ if submit:
                     f"Score: {st.session_state.score}"
                 )
             else:
+                # FIXME: After a miss with attempts remaining, the UI did not explicitly
+                # refresh into a clean post-guess state.
+                # FIX: AI and I rerun here so the updated attempts, score, and saved hint
+                # render immediately on the next Streamlit pass.
                 st.rerun()
 
 st.divider()

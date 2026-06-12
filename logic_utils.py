@@ -42,6 +42,10 @@ def check_guess(guess, secret):
         return "Win", "🎉 Correct!"
 
     try:
+        # FIXME: In the baseline, the hint text was inverted and the "Too High" branch
+        # told players to go higher.
+        # FIX: AI and I corrected the direction text and replaced the corrupted character
+        # from that earlier edit with the intended downward hint.
         if guess > secret:
             return "Too High", "📉 Go LOWER!"
         return "Too Low", "📈 Go HIGHER!"
@@ -49,6 +53,9 @@ def check_guess(guess, secret):
         guess_as_text = str(guess)
         if guess_as_text == secret:
             return "Win", "🎉 Correct!"
+        # FIXME: The fallback string-comparison branch had the same reversed hint bug.
+        # FIX: AI and I kept the fallback aligned with the main branch so both paths give
+        # the same corrected guidance.
         if guess_as_text > secret:
             return "Too High", "📉 Go LOWER!"
         return "Too Low", "📈 Go HIGHER!"
@@ -57,9 +64,15 @@ def check_guess(guess, secret):
 def update_score(current_score: int, outcome: str, attempt_number: int):
     """Update score based on outcome and attempt number."""
     if outcome == "Win":
+        # FIXME: The baseline win formula used attempt_number + 1, and later scoring
+        # changes stacked win points on top of earlier penalties in a confusing way.
+        # FIX: AI and I made wins resolve directly from the real attempt count with
+        # a 10-point floor, so the final win score is predictable.
         return max(100 - 10 * attempt_number, 10)
 
     if outcome == "Too High":
+        # FIXME: An earlier revision rewarded +5 on even "Too High" attempts.
+        # FIX: AI and I changed that rule so every "Too High" result deducts 5 points.
         return current_score - 5
 
     if outcome == "Too Low":

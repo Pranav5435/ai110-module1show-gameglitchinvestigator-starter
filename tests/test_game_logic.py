@@ -1,5 +1,8 @@
 from logic_utils import check_guess, update_score
 
+# FIX: AI and I added regression tests around the hint and scoring changes so the
+# baseline bugs stay visible if someone reintroduces them later.
+
 def test_winning_guess():
     # If the secret is 50 and guess is 50, it should be a win
     outcome, _ = check_guess(50, 50)
